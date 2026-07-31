@@ -178,6 +178,7 @@ class LintProjectDescriptionTest {
     }
   }
 
+
   @Test
   fun testGenerateProjectDescriptionXml_missingManifest_noManifestTagInXml() {
     val appManifest = File(tempFolder.root, "app/src/main/AndroidManifest.xml")
