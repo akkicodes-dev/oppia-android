@@ -469,9 +469,12 @@ private class LayerConfigurationBuilder(
     val layerManifest = File(repoRoot, "${layer.layerName}/$ANDROID_MANIFEST_PATH")
     if (layerManifest.exists()) return layerManifest.absolutePath
 
-    val topLevelManifest = File(repoRoot, TOP_LEVEL_MANIFEST_PATH)
-    if (topLevelManifest.exists()) return topLevelManifest.absolutePath
+    if (layer == LayerName.APPLICATION_LAYER) {
+      val topLevelManifest = File(repoRoot, TOP_LEVEL_MANIFEST_PATH)
+      if (topLevelManifest.exists()) return topLevelManifest.absolutePath
+    }
 
+    logger.logError("Manifest file not found for layer: ${layer.layerName}")
     return null
   }
 }

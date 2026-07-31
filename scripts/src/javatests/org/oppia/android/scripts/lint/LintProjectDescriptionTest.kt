@@ -180,7 +180,7 @@ class LintProjectDescriptionTest {
 
 
   @Test
-  fun testGenerateProjectDescriptionXml_missingManifest_noManifestTagInXml() {
+  fun testGenerateProjectDescriptionXml_missingLayerManifest_noManifestTagForThatLayer() {
     val appManifest = File(tempFolder.root, "app/src/main/AndroidManifest.xml")
     appManifest.delete()
     setupFakeCommandExecutor()
@@ -188,8 +188,32 @@ class LintProjectDescriptionTest {
     val result = lintProjectDescriptionWithFakeExecutor.generateProjectDescriptionXml()
     val xmlContent = result.readText()
 
-    val manifestCount = xmlContent.split("<manifest file=").size - 1
-    assertThat(manifestCount).isEqualTo(4)
+    val appModuleContent = extractModuleContent(xmlContent, "app")
+    assertThat(appModuleContent).doesNotContain("<manifest file=")
+
+    val utilityModuleContent = extractModuleContent(xmlContent, "utility")
+    assertThat(utilityModuleContent).contains("<manifest file=")
+  }
+
+  @Test
+  fun testGenerateProjectDescriptionXml_topLevelManifestFallback_usedForAppLayer() {
+    val appManifest = File(tempFolder.root, "app/src/main/AndroidManifest.xml")
+    appManifest.delete()
+    val topLevelManifest = File(tempFolder.root, "AndroidManifest.xml")
+    topLevelManifest.writeText(
+      """
+      <?xml version="1.0" encoding="utf-8"?>
+      <manifest package="org.oppia.android" />
+      """.trimIndent()
+    )
+    setupFakeCommandExecutor()
+
+    val result = lintProjectDescriptionWithFakeExecutor.generateProjectDescriptionXml()
+    val xmlContent = result.readText()
+
+    val appModuleContent = extractModuleContent(xmlContent, "app")
+    assertThat(appModuleContent).contains("<manifest file=")
+    assertThat(appModuleContent).contains("AndroidManifest.xml")
   }
 
   @Test
